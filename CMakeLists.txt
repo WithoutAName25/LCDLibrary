@@ -14,6 +14,11 @@ add_library(LCDLibrary STATIC
         LCDController.cpp LCDController.h
         LCDGraphics.cpp LCDGraphics.h
         LCDDirectGraphics.cpp LCDDirectGraphics.h
+        include/LCDLibrary.h
+)
+
+target_include_directories(LCDLibrary PUBLIC
+    include
 )
 
 target_link_libraries(LCDLibrary pico_stdlib hardware_spi hardware_pwm)

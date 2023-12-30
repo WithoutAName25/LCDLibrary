@@ -163,30 +163,6 @@ void LCDController::applyDefaultConfig() const {
     write(0x29);
 }
 
-inline void LCDController::beginTransmission() const {
-    gpio_put(chipSelectPin, false);
-}
-
-inline void LCDController::enableCommand() const {
-    gpio_put(dataCommandPin, false);
-}
-
-inline void LCDController::enableData() const {
-    gpio_put(dataCommandPin, true);
-}
-
-inline void LCDController::endTransmission() const {
-    gpio_put(chipSelectPin, true);
-}
-
-inline void LCDController::write(uint8_t byte) const {
-    write(&byte, 1);
-}
-
-inline void LCDController::write(uint8_t *bytes, uint32_t len) const {
-    spi_write_blocking(spiInst, bytes, len);
-}
-
 void LCDController::reset() const {
     gpio_put(resetPin, false);
     sleep_ms(50);

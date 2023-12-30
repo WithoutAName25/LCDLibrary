@@ -35,21 +35,34 @@ private:
     void applyDefaultConfig() const;
 
 protected:
-    inline void beginTransmission() const;
+    inline void beginTransmission() const {
+        gpio_put(chipSelectPin, false);
+    }
 
-    inline void enableCommand() const;
+    inline void enableCommand() const {
+        gpio_put(dataCommandPin, false);
+    }
 
-    inline void enableData() const;
+    inline void enableData() const {
+        gpio_put(dataCommandPin, true);
+    }
 
-    inline void endTransmission() const;
+    inline void endTransmission() const {
+        gpio_put(chipSelectPin, true);
+    }
 
-    inline void write(uint8_t byte) const;
+    inline void write(uint8_t byte) const {
+        write(&byte, 1);
+    }
 
-    inline void write(uint8_t *bytes, uint32_t len) const;
+    inline void write(uint8_t *bytes, uint32_t len) const {
+        spi_write_blocking(spiInst, bytes, len);
+    }
 
 
 public:
-    LCDController(spi_inst *spiInst, uint8_t dataPin, uint8_t clockPin, uint8_t chipSelectPin, uint8_t dataCommandPin, uint8_t resetPin,
+    LCDController(spi_inst *spiInst, uint8_t dataPin, uint8_t clockPin, uint8_t chipSelectPin, uint8_t dataCommandPin,
+                  uint8_t resetPin,
                   uint8_t backlightPin, uint8_t xOffset, uint8_t yOffset);
 
     /**

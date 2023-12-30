@@ -56,7 +56,7 @@ LCDDirectGraphics::fillBorderedRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t 
     sendDataRepeated(border, width * borderWidth + borderWidth);
     for (int i = 0; i < height - 2 * borderWidth; ++i) {
         sendDataRepeated(inner, width - 2 * borderWidth);
-        sendDataRepeated(borderWidth, 2 * borderWidth);
+        sendDataRepeated(border, 2 * borderWidth);
     }
     sendDataRepeated(border, width * borderWidth - borderWidth);
 }

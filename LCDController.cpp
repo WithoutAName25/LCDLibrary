@@ -1,14 +1,16 @@
-#include "library.h"
+#include "LCDController.h"
 
-LCD::LCD(spi_inst *spiInst, uint dataPin, uint clockPin, uint chipSelectPin, uint dataCommandPin, uint resetPin,
-         uint backlightPin)
+LCDController::LCDController(spi_inst *spiInst, uint8_t dataPin, uint8_t clockPin, uint8_t chipSelectPin,
+                             uint8_t dataCommandPin, uint8_t resetPin, uint8_t backlightPin, uint8_t xOffset,
+                             uint8_t yOffset)
         : spiInst(spiInst), dataPin(dataPin), clockPin(clockPin), chipSelectPin(chipSelectPin),
-          dataCommandPin(dataCommandPin), resetPin(resetPin), backlightPin(backlightPin) {
+          dataCommandPin(dataCommandPin), resetPin(resetPin), backlightPin(backlightPin), xOffset(xOffset),
+          yOffset(yOffset) {
     backlightPWMSlice = pwm_gpio_to_slice_num(backlightPin);
     backlightPWMChannel = pwm_gpio_to_channel(backlightPin);
 }
 
-void LCD::setupPins() const {
+void LCDController::setupPins() const {
     // SPI Config
     spi_init(spiInst, 10 * 1000 * 1000);
     gpio_set_function(clockPin, GPIO_FUNC_SPI);
@@ -36,7 +38,7 @@ void LCD::setupPins() const {
     pwm_set_enabled(backlightPWMSlice, true);
 }
 
-void LCD::applyDefaultConfig() const {
+void LCDController::applyDefaultConfig() const {
     beginTransmission();
 
     enableCommand();
@@ -161,58 +163,94 @@ void LCD::applyDefaultConfig() const {
     write(0x29);
 }
 
-inline void LCD::beginTransmission() const {
+inline void LCDController::beginTransmission() const {
     gpio_put(chipSelectPin, false);
 }
 
-inline void LCD::enableCommand() const {
+inline void LCDController::enableCommand() const {
     gpio_put(dataCommandPin, false);
 }
 
-inline void LCD::enableData() const {
+inline void LCDController::enableData() const {
     gpio_put(dataCommandPin, true);
 }
 
-inline void LCD::endTransmission() const {
+inline void LCDController::endTransmission() const {
     gpio_put(chipSelectPin, true);
 }
 
-inline void LCD::write(uint8_t byte) const {
+inline void LCDController::write(uint8_t byte) const {
     write(&byte, 1);
 }
 
-inline void LCD::write(uint8_t *bytes, uint32_t len) const {
+inline void LCDController::write(uint8_t *bytes, uint32_t len) const {
     spi_write_blocking(spiInst, bytes, len);
 }
 
-void LCD::reset() const {
+void LCDController::reset() const {
     gpio_put(resetPin, false);
     sleep_ms(50);
     gpio_put(resetPin, true);
     sleep_ms(200);
 }
 
-void LCD::setBrightness(uint value) {
+void LCDController::setBrightness(uint8_t value) {
     if (value > 100) value = 100;
     brightness = value;
     pwm_set_chan_level(backlightPWMSlice, backlightPWMChannel, brightness);
 }
 
-void LCD::sendCommand(uint8_t command) const {
+void LCDController::setWindows(uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd) const {
+    uint16_t x0 = xStart + xOffset;
+    uint16_t y0 = yStart + yOffset;
+    uint16_t x1 = xEnd - 1 + xOffset;
+    uint16_t y1 = yEnd - 1 + yOffset;
+
+    beginTransmission();
+    enableCommand();
+    write(0x2a);
+    enableData();
+    write(x0 >> 8);
+    write(x0);
+    write(x1 >> 8);
+    write(x1);
+
+    enableCommand();
+    write(0x2b);
+    enableData();
+    write(y0 >> 8);
+    write(y0);
+    write(y1 >> 8);
+    write(y1);
+
+    enableCommand();
+    write(0x2C);
+    endTransmission();
+}
+
+void LCDController::sendCommand(uint8_t command) const {
     beginTransmission();
     enableCommand();
     write(command);
     endTransmission();
 }
 
-void LCD::sendDataByte(uint8_t data) const {
+void LCDController::sendDataByte(uint8_t data) const {
     beginTransmission();
     enableData();
     write(data);
     endTransmission();
 }
 
-void LCD::sendDataBytes(uint8_t *data, uint32_t len) const {
+void LCDController::sendDataWord(uint16_t data) const {
+    beginTransmission();
+    enableData();
+    write(data >> 8);
+    write(data);
+    endTransmission();
+}
+
+void LCDController::sendDataBytes(uint8_t *data, uint32_t len) const {
     beginTransmission();
     enableData();
 
@@ -221,7 +259,7 @@ void LCD::sendDataBytes(uint8_t *data, uint32_t len) const {
     endTransmission();
 }
 
-void LCD::sendDataRepeated(uint16_t data, uint32_t len, uint32_t blockSize) const {
+void LCDController::sendDataRepeated(uint16_t data, uint32_t len, uint32_t blockSize) const {
     beginTransmission();
     enableData();
 

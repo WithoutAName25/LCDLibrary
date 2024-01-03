@@ -42,125 +42,17 @@ void LCDController::applyDefaultConfig() const {
     beginTransmission();
 
     enableCommand();
-    write(0x11);//Sleep exit 
-    sleep_ms(120);
-    write(0x21);
-
-    write(0xB1);
-    enableData();
-    write(0x05);
-    write(0x3A);
-    write(0x3A);
+    write(0x11); // SLPOUT Sleep Out
+    sleep_ms(5);
+    write(0x21); // INVON Display Inversioon On
 
     enableCommand();
-    write(0xB2);
+    write(0x3A); // COLMOD Interface Pixel Format
     enableData();
-    write(0x05);
-    write(0x3A);
-    write(0x3A);
+    write(0x05); // 16 bit / pixel
 
     enableCommand();
-    write(0xB3);
-    enableData();
-    write(0x05);
-    write(0x3A);
-    write(0x3A);
-    write(0x05);
-    write(0x3A);
-    write(0x3A);
-
-    enableCommand();
-    write(0xB4);
-    enableData();
-    write(0x03);
-
-    enableCommand();
-    write(0xC0);
-    enableData();
-    write(0x62);
-    write(0x02);
-    write(0x04);
-
-    enableCommand();
-    write(0xC1);
-    enableData();
-    write(0xC0);
-
-    enableCommand();
-    write(0xC2);
-    enableData();
-    write(0x0D);
-    write(0x00);
-
-    enableCommand();
-    write(0xC3);
-    enableData();
-    write(0x8D);
-    write(0x6A);
-
-    enableCommand();
-    write(0xC4);
-    enableData();
-    write(0x8D);
-    write(0xEE);
-
-    enableCommand();
-    write(0xC5);  /*VCOM*/
-    enableData();
-    write(0x0E);
-
-    enableCommand();
-    write(0xE0);
-    enableData();
-    write(0x10);
-    write(0x0E);
-    write(0x02);
-    write(0x03);
-    write(0x0E);
-    write(0x07);
-    write(0x02);
-    write(0x07);
-    write(0x0A);
-    write(0x12);
-    write(0x27);
-    write(0x37);
-    write(0x00);
-    write(0x0D);
-    write(0x0E);
-    write(0x10);
-
-    enableCommand();
-    write(0xE1);
-    enableData();
-    write(0x10);
-    write(0x0E);
-    write(0x03);
-    write(0x03);
-    write(0x0F);
-    write(0x06);
-    write(0x02);
-    write(0x08);
-    write(0x0A);
-    write(0x13);
-    write(0x26);
-    write(0x36);
-    write(0x00);
-    write(0x0D);
-    write(0x0E);
-    write(0x10);
-
-    enableCommand();
-    write(0x3A);
-    enableData();
-    write(0x05);
-
-    enableCommand();
-    write(0x36);
-    enableData();
-    write(0xA8);
-
-    enableCommand();
-    write(0x29);
+    write(0x29); // DISPON Display On
 }
 
 void LCDController::reset() const {

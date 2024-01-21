@@ -4,6 +4,7 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include "hardware/pwm.h"
+#include "SPIInterface.h"
 
 /**
  * \class LCDController
@@ -17,11 +18,6 @@
  */
 class LCDController {
 private:
-    spi_inst *spiInst;
-    uint8_t dataPin;
-    uint8_t clockPin;
-    uint8_t chipSelectPin;
-    uint8_t dataCommandPin;
     uint8_t resetPin;
     uint8_t backlightPin;
     uint8_t brightness = 100;
@@ -35,35 +31,11 @@ private:
     void applyDefaultConfig() const;
 
 protected:
-    inline void beginTransmission() const {
-        gpio_put(chipSelectPin, false);
-    }
-
-    inline void enableCommand() const {
-        gpio_put(dataCommandPin, false);
-    }
-
-    inline void enableData() const {
-        gpio_put(dataCommandPin, true);
-    }
-
-    inline void endTransmission() const {
-        gpio_put(chipSelectPin, true);
-    }
-
-    inline void write(uint8_t byte) const {
-        write(&byte, 1);
-    }
-
-    inline void write(uint8_t *bytes, uint32_t len) const {
-        spi_write_blocking(spiInst, bytes, len);
-    }
-
+    SPIInterface *spi;
 
 public:
-    LCDController(spi_inst *spiInst, uint8_t dataPin, uint8_t clockPin, uint8_t chipSelectPin, uint8_t dataCommandPin,
-                  uint8_t resetPin,
-                  uint8_t backlightPin, uint8_t xOffset, uint8_t yOffset);
+    LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint8_t xOffset,
+                  uint8_t yOffset);
 
     /**
      * \fn void LCDController::init() const
@@ -73,6 +45,7 @@ public:
      * This function sets up the pins and applies the default configuration for the LCDController.
      */
     void init() const {
+        spi->init();
         setupPins();
         applyDefaultConfig();
     }

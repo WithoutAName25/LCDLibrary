@@ -1,36 +1,20 @@
 #include "LCDController.h"
 
-LCDController::LCDController(spi_inst *spiInst, uint8_t dataPin, uint8_t clockPin, uint8_t chipSelectPin,
-                             uint8_t dataCommandPin, uint8_t resetPin, uint8_t backlightPin, uint8_t xOffset,
+LCDController::LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint8_t xOffset,
                              uint8_t yOffset)
-        : spiInst(spiInst), dataPin(dataPin), clockPin(clockPin), chipSelectPin(chipSelectPin),
-          dataCommandPin(dataCommandPin), resetPin(resetPin), backlightPin(backlightPin), xOffset(xOffset),
+        : spi(spi), resetPin(resetPin), backlightPin(backlightPin), xOffset(xOffset),
           yOffset(yOffset) {
     backlightPWMSlice = pwm_gpio_to_slice_num(backlightPin);
     backlightPWMChannel = pwm_gpio_to_channel(backlightPin);
 }
 
 void LCDController::setupPins() const {
-    // SPI Config
-    spi_init(spiInst, 10 * 1000 * 1000);
-    gpio_set_function(clockPin, GPIO_FUNC_SPI);
-    gpio_set_function(dataPin, GPIO_FUNC_SPI);
-
-    // GPIO Config
+    // Reset Config
     gpio_init(resetPin);
-    gpio_init(dataCommandPin);
-    gpio_init(chipSelectPin);
-
     gpio_set_dir(resetPin, GPIO_OUT);
-    gpio_set_dir(dataCommandPin, GPIO_OUT);
-    gpio_set_dir(chipSelectPin, GPIO_OUT);
-
     gpio_put(resetPin, true);
-    gpio_put(chipSelectPin, true);
-    gpio_put(dataCommandPin, false);
 
-
-    // PWM Config
+    // Backlight Config
     gpio_set_function(backlightPin, GPIO_FUNC_PWM);
     pwm_set_wrap(backlightPWMSlice, 100);
     pwm_set_chan_level(backlightPWMSlice, backlightPWMChannel, brightness);
@@ -39,20 +23,37 @@ void LCDController::setupPins() const {
 }
 
 void LCDController::applyDefaultConfig() const {
-    beginTransmission();
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x01); // Software reset
+    spi->endTransmission();
 
-    enableCommand();
-    write(0x11); // SLPOUT Sleep Out
-    sleep_ms(5);
-    write(0x21); // INVON Display Inversioon On
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x11); // Exit sleep mode
+    spi->endTransmission();
 
-    enableCommand();
-    write(0x3A); // COLMOD Interface Pixel Format
-    enableData();
-    write(0x05); // 16 bit / pixel
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x3A); // Set color mode
+    spi->enableData();
+    spi->write(0x05); // 16 bit / pixel
+    spi->endTransmission();
 
-    enableCommand();
-    write(0x29); // DISPON Display On
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x21); // Inversion on, then 10 ms delay (supposedly a hack?)
+    spi->endTransmission();
+
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x13); // Normal display on, then 10 ms delay
+    spi->endTransmission();
+
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x29); // Main screen turn on, then wait 500 ms
+    spi->endTransmission();
 }
 
 void LCDController::reset() const {
@@ -74,62 +75,62 @@ void LCDController::setWindows(uint8_t xStart, uint8_t yStart, uint8_t xEnd, uin
     uint16_t x1 = xEnd - 1 + xOffset;
     uint16_t y1 = yEnd - 1 + yOffset;
 
-    beginTransmission();
-    enableCommand();
-    write(0x2a);
-    enableData();
-    write(x0 >> 8);
-    write(x0);
-    write(x1 >> 8);
-    write(x1);
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x2a);
+    spi->enableData();
+    spi->write(x0 >> 8);
+    spi->write(x0);
+    spi->write(x1 >> 8);
+    spi->write(x1);
 
-    enableCommand();
-    write(0x2b);
-    enableData();
-    write(y0 >> 8);
-    write(y0);
-    write(y1 >> 8);
-    write(y1);
+    spi->enableCommand();
+    spi->write(0x2b);
+    spi->enableData();
+    spi->write(y0 >> 8);
+    spi->write(y0);
+    spi->write(y1 >> 8);
+    spi->write(y1);
 
-    enableCommand();
-    write(0x2C);
-    endTransmission();
+    spi->enableCommand();
+    spi->write(0x2C);
+    spi->endTransmission();
 }
 
 void LCDController::sendCommand(uint8_t command) const {
-    beginTransmission();
-    enableCommand();
-    write(command);
-    endTransmission();
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(command);
+    spi->endTransmission();
 }
 
 void LCDController::sendDataByte(uint8_t data) const {
-    beginTransmission();
-    enableData();
-    write(data);
-    endTransmission();
+    spi->beginTransmission();
+    spi->enableData();
+    spi->write(data);
+    spi->endTransmission();
 }
 
 void LCDController::sendDataWord(uint16_t data) const {
-    beginTransmission();
-    enableData();
-    write(data >> 8);
-    write(data);
-    endTransmission();
+    spi->beginTransmission();
+    spi->enableData();
+    spi->write(data >> 8);
+    spi->write(data);
+    spi->endTransmission();
 }
 
 void LCDController::sendDataBytes(uint8_t *data, uint32_t len) const {
-    beginTransmission();
-    enableData();
+    spi->beginTransmission();
+    spi->enableData();
 
-    write(data, len);
+    spi->write(data, len);
 
-    endTransmission();
+    spi->endTransmission();
 }
 
 void LCDController::sendDataRepeated(uint16_t data, uint32_t len, uint32_t blockSize) const {
-    beginTransmission();
-    enableData();
+    spi->beginTransmission();
+    spi->enableData();
 
     uint8_t dataArray[blockSize * 2];
     for (int i = 0; i < blockSize; ++i) {
@@ -139,9 +140,9 @@ void LCDController::sendDataRepeated(uint16_t data, uint32_t len, uint32_t block
 
     uint32_t numBlocks = len / blockSize;
     for (uint32_t i = 0; i < numBlocks; ++i) {
-        write(dataArray, blockSize * 2);
+        spi->write(dataArray, blockSize * 2);
     }
-    write(dataArray, (len % blockSize) * 2);
+    spi->write(dataArray, (len % blockSize) * 2);
 
-    endTransmission();
+    spi->endTransmission();
 }

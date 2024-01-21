@@ -5,11 +5,14 @@
 
 class LCDDirectGraphics : public LCDGraphics {
 public:
-    LCDDirectGraphics(spi_inst *spiInst, uint dataPin, uint clockPin, uint chipSelectPin, uint dataCommandPin,
-                      uint resetPin, uint backlightPin, uint8_t xOffset, uint8_t yOffset, uint8_t width,
+    LCDDirectGraphics(SPIInterface *spi,
+                      uint resetPin,
+                      uint backlightPin,
+                      uint8_t xOffset,
+                      uint8_t yOffset,
+                      uint8_t width,
                       uint8_t height)
-            : LCDGraphics(spiInst, dataPin, clockPin, chipSelectPin, dataCommandPin, resetPin, backlightPin, xOffset,
-                          yOffset, width, height) {}
+            : LCDGraphics(spi, resetPin, backlightPin, xOffset, yOffset, width, height) {}
 
     void clear(color background) override;
 

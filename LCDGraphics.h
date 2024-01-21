@@ -28,11 +28,7 @@ protected:
 
 public:
     LCDGraphics(
-            spi_inst *spiInst,
-            uint dataPin,
-            uint clockPin,
-            uint chipSelectPin,
-            uint dataCommandPin,
+            SPIInterface *spi,
             uint resetPin,
             uint backlightPin,
             uint8_t xOffset,
@@ -40,11 +36,7 @@ public:
             uint8_t width,
             uint8_t height
     ) : LCDController(
-            spiInst,
-            dataPin,
-            clockPin,
-            chipSelectPin,
-            dataCommandPin,
+            spi,
             resetPin,
             backlightPin,
             xOffset,

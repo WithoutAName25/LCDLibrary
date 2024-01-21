@@ -18,19 +18,19 @@ void LCDDirectGraphics::draw(uint8_t x, uint8_t y, bitmap image) {
     uint8_t minX = x0 < x1 ? x0 : x1;
     uint8_t minY = y0 < y1 ? y0 : y1;
 
-    beginTransmission();
-    enableData();
+    spi->beginTransmission();
+    spi->enableData();
     for (int dY = 0; dY < getRotation() % 180 == 0 ? image.height : image.width; ++dY) {
         for (int dX = 0; dX < getRotation() % 180 == 0 ? image.width : image.height; ++dX) {
             uint8_t pixelX = minX + dX;
             uint8_t pixelY = minY + dY;
             reverseTransformation(pixelX, pixelY);
             color pixel = image.data[pixelY * image.width + pixelX];
-            write(pixel >> 8);
-            write(pixel);
+            spi->write(pixel >> 8);
+            spi->write(pixel);
         }
     }
-    endTransmission();
+    spi->endTransmission();
 }
 
 void LCDDirectGraphics::drawPixel(uint8_t x, uint8_t y, color color) {

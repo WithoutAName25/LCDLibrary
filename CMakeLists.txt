@@ -15,10 +15,14 @@ add_library(LCDLibrary STATIC
         LCDGraphics.cpp LCDGraphics.h
         LCDDirectGraphics.cpp LCDDirectGraphics.h
         include/LCDLibrary.h
+        SPIInterface.cpp
+        SPIInterface.h
 )
+
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/spi.pio)
 
 target_include_directories(LCDLibrary PUBLIC
     include
 )
 
-target_link_libraries(LCDLibrary pico_stdlib hardware_spi hardware_pwm)
+target_link_libraries(LCDLibrary pico_stdlib hardware_spi hardware_pio hardware_pwm)

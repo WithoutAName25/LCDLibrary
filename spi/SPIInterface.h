@@ -46,41 +46,5 @@ public:
     virtual void write(uint8_t *bytes, uint32_t len) const = 0;
 };
 
-class HardwareSPIInterface : public SPIInterface {
-private:
-    spi_inst *spiInst;
-    uint8_t dataPin;
-    uint8_t clockPin;
-
-public:
-    HardwareSPIInterface(spi_inst *spiInst, uint8_t dataPin, uint8_t clockPin, uint chipSelectPin, uint dataCommandPin);
-
-    void init() const override;
-
-    void write(uint8_t *bytes, uint32_t len) const override;
-};
-
-class PIOSPIInterface : public SPIInterface {
-private:
-    PIO pio;
-    uint sm;
-    uint8_t dataPin;
-    uint8_t clockPin;
-
-    void putData(uint8_t data) const;
-
-protected:
-    void waitIdle() const override;
-
-public:
-    PIOSPIInterface(PIO pio, uint8_t dataPin, uint8_t clockPin, uint chipSelectPin, uint dataCommandPin);
-
-    void init() const override;
-
-    void write(uint8_t *bytes, uint32_t len) const override;
-
-
-};
-
 
 #endif //PICOKEYBOARD_SPIINTERFACE_H

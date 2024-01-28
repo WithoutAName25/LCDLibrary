@@ -12,14 +12,18 @@ pico_sdk_init()
 add_library(LCDLibrary STATIC
         utils.cpp utils.h
         LCDController.cpp LCDController.h
-        LCDGraphics.cpp LCDGraphics.h
-        LCDDirectGraphics.cpp LCDDirectGraphics.h
+        graphics/LCDGraphics.cpp graphics/LCDGraphics.h
+        graphics/LCDDirectGraphics.cpp graphics/LCDDirectGraphics.h
         include/LCDLibrary.h
-        SPIInterface.cpp
-        SPIInterface.h
+        spi/SPIInterface.cpp
+        spi/SPIInterface.h
+        spi/HardwareSPIInterface.cpp
+        spi/HardwareSPIInterface.h
+        spi/PioSPIInterface.cpp
+        spi/PioSPIInterface.h
 )
 
-pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/spi.pio)
+pico_generate_pio_header(${PROJECT_NAME} spi/spi.pio)
 
 target_include_directories(LCDLibrary PUBLIC
     include

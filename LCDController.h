@@ -4,7 +4,7 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include "hardware/pwm.h"
-#include "SPIInterface.h"
+#include "spi/SPIInterface.h"
 
 /**
  * \class LCDController

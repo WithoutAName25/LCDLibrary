@@ -1,8 +1,8 @@
 #ifndef LCDLIBRARY_LCDGRAPHICS_H
 #define LCDLIBRARY_LCDGRAPHICS_H
 
-#include "LCDController.h"
-#include "utils.h"
+#include "../LCDController.h"
+#include "../utils.h"
 
 enum Rotation {
     Degree_0 = 0,

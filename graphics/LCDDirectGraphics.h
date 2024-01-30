@@ -8,11 +8,19 @@ public:
     LCDDirectGraphics(SPIInterface *spi,
                       uint resetPin,
                       uint backlightPin,
-                      uint8_t xOffset,
-                      uint8_t yOffset,
-                      uint8_t width,
-                      uint8_t height)
-            : LCDGraphics(spi, resetPin, backlightPin, xOffset, yOffset, width, height) {}
+                      uint8_t hwXOffset,
+                      uint8_t hwYOffset,
+                      uint8_t hwWidth,
+                      uint8_t hwHeight,
+                      Rotation rotation)
+            : LCDGraphics(spi,
+                          resetPin,
+                          backlightPin,
+                          hwXOffset,
+                          hwYOffset,
+                          hwWidth,
+                          hwHeight,
+                          rotation) {}
 
     void clear(color background) override;
 
@@ -20,10 +28,10 @@ public:
 
     void drawPixel(uint8_t x, uint8_t y, color color) override;
 
-    void fillRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, color color) override;
+    void fillRect(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY, color color) override;
 
-    void fillBorderedRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t borderWidth, color inner,
-                          color border) override;
+    void fillBorderedRect(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY, uint8_t borderWidth,
+                          color inner, color border) override;
 };
 
 

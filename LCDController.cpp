@@ -1,9 +1,9 @@
 #include "LCDController.h"
 
-LCDController::LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint8_t xOffset,
-                             uint8_t yOffset)
-        : spi(spi), resetPin(resetPin), backlightPin(backlightPin), xOffset(xOffset),
-          yOffset(yOffset) {
+LCDController::LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint16_t hwXOffset,
+                             uint16_t hwYOffset, uint16_t hwWidth, uint16_t hwHeight, Rotation rotation)
+        : spi(spi), resetPin(resetPin), backlightPin(backlightPin), hwXOffset(hwXOffset),
+          hwYOffset(hwYOffset), hwWidth(hwWidth), hwHeight(hwHeight), rotation(rotation) {
     backlightPWMSlice = pwm_gpio_to_slice_num(backlightPin);
     backlightPWMChannel = pwm_gpio_to_channel(backlightPin);
 }
@@ -40,6 +40,8 @@ void LCDController::applyDefaultConfig() const {
     spi->write(0x05); // 16 bit / pixel
     spi->endTransmission();
 
+    updateMemoryDataAccessControl();
+
     spi->beginTransmission();
     spi->enableCommand();
     spi->write(0x21); // Inversion on, then 10 ms delay (supposedly a hack?)
@@ -56,6 +58,30 @@ void LCDController::applyDefaultConfig() const {
     spi->endTransmission();
 }
 
+void LCDController::updateMemoryDataAccessControl() const {
+    spi->beginTransmission();
+    spi->enableCommand();
+    spi->write(0x36); // Set Memory Data Access Control
+    spi->enableData();
+    uint8_t madctl = 0;
+    switch (rotation) {
+        case Degree_0:
+            madctl = 0b00000000; // Normal mode
+            break;
+        case Degree_90:
+            madctl = 0b10100000; // Y-Mirror, X-Y-Exchange
+            break;
+        case Degree_180:
+            madctl = 0b11000000; // Y-Mirror, X-Mirror
+            break;
+        case Degree_270:
+            madctl = 0b01100000; // X-Mirror, X-Y-Exchange
+            break;
+    }
+    spi->write(madctl);
+    spi->endTransmission();
+}
+
 void LCDController::reset() const {
     gpio_put(resetPin, false);
     sleep_ms(50);
@@ -69,11 +95,42 @@ void LCDController::setBrightness(uint8_t value) {
     pwm_set_chan_level(backlightPWMSlice, backlightPWMChannel, brightness);
 }
 
-void LCDController::setWindows(uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd) const {
-    uint16_t x0 = xStart + xOffset;
-    uint16_t y0 = yStart + yOffset;
-    uint16_t x1 = xEnd - 1 + xOffset;
-    uint16_t y1 = yEnd - 1 + yOffset;
+void LCDController::setRotation(Rotation newRotation) {
+    rotation = newRotation;
+    updateMemoryDataAccessControl();
+}
+
+void LCDController::setWindows(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY) const {
+    uint16_t x0;
+    uint16_t x1;
+    uint16_t y0;
+    uint16_t y1;
+    switch (rotation) {
+        case Degree_0:
+            x0 = hwXOffset + firstX;
+            x1 = hwXOffset + lastX;
+            y0 = hwYOffset + firstY;
+            y1 = hwYOffset + lastY;
+            break;
+        case Degree_90:
+            x0 = 320 - hwYOffset - hwHeight + firstX;
+            x1 = 320 - hwYOffset - hwHeight + lastX;
+            y0 = hwXOffset + firstY;
+            y1 = hwXOffset + lastY;
+            break;
+        case Degree_180:
+            x0 = 240 - hwXOffset - hwWidth + firstX;
+            x1 = 240 - hwXOffset - hwWidth + lastX;
+            y0 = 320 - hwYOffset - hwHeight + firstY;
+            y1 = 320 - hwYOffset - hwHeight + lastY;
+            break;
+        case Degree_270:
+            x0 = hwYOffset + firstX;
+            x1 = hwYOffset + lastX;
+            y0 = 240 - hwXOffset - hwWidth + firstY;
+            y1 = 240 - hwXOffset - hwWidth + lastY;
+            break;
+    }
 
     spi->beginTransmission();
     spi->enableCommand();
@@ -145,4 +202,12 @@ void LCDController::sendDataRepeated(uint16_t data, uint32_t len, uint32_t block
     spi->write(dataArray, (len % blockSize) * 2);
 
     spi->endTransmission();
+}
+
+uint16_t LCDController::getWidth() const {
+    return rotation % 180 == 0 ? hwWidth : hwHeight;
+}
+
+uint16_t LCDController::getHeight() const {
+    return rotation % 180 == 0 ? hwHeight : hwWidth;
 }

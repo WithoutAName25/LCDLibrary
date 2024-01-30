@@ -2,13 +2,14 @@
 #define LCDLIBRARY_UTILS_H
 
 #include "pico/stdlib.h"
+#include "memory"
 
 typedef uint16_t color;
 
 struct bitmap {
     uint8_t width;
     uint8_t height;
-    color data[];
+    std::unique_ptr<color[]> data;
 };
 
 /**

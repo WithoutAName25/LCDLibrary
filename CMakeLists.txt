@@ -23,7 +23,7 @@ add_library(LCDLibrary STATIC
         spi/PioSPIInterface.h
 )
 
-pico_generate_pio_header(${PROJECT_NAME} spi/spi.pio)
+pico_generate_pio_header(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/spi/spi.pio)
 
 target_include_directories(LCDLibrary PUBLIC
     include

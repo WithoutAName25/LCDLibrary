@@ -6,6 +6,13 @@
 #include "hardware/pwm.h"
 #include "spi/SPIInterface.h"
 
+enum Rotation {
+    Degree_0 = 0,
+    Degree_90 = 90,
+    Degree_180 = 180,
+    Degree_270 = 270
+};
+
 /**
  * \class LCDController
  *
@@ -23,19 +30,24 @@ private:
     uint8_t brightness = 100;
     uint8_t backlightPWMSlice;
     uint8_t backlightPWMChannel;
-    uint8_t xOffset;
-    uint8_t yOffset;
 
     void setupPins() const;
 
     void applyDefaultConfig() const;
 
+    void updateMemoryDataAccessControl() const;
+
 protected:
     SPIInterface *spi;
+    uint16_t hwXOffset;
+    uint16_t hwYOffset;
+    uint16_t hwWidth;
+    uint16_t hwHeight;
+    Rotation rotation;
 
 public:
-    LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint8_t xOffset,
-                  uint8_t yOffset);
+    LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint16_t hwXOffset, uint16_t hwYOffset,
+                  uint16_t hwWidth, uint16_t hwHeight, Rotation rotation);
 
     /**
      * \fn void LCDController::init() const
@@ -69,20 +81,9 @@ public:
      */
     void setBrightness(uint8_t value);
 
-    /**
-     * \fn void LCDController::setWindows(uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd) const
-     *
-     * \brief Sets the window for drawing on the LCD display.
-     *
-     * This function sets the window for drawing on the LCD display. The window is defined by the starting (inclusive)
-     * and ending (exclusive) coordinates in the X and Y directions. The coordinates are specified as 8-bit integers.
-     *
-     * \param xStart The starting X-coordinate of the window (inclusive).
-     * \param yStart The starting Y-coordinate of the window (inclusive).
-     * \param xEnd The ending X-coordinate of the window (exclusive).
-     * \param yEnd The ending Y-coordinate of the window (exclusive).
-     */
-    void setWindows(uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd) const;
+    void setRotation(Rotation newRotation);
+
+    void setWindows(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY) const;
 
     /**
      * \fn void LCDController::sendCommand(uint8_t command) const
@@ -142,6 +143,10 @@ public:
      * \param blockSize The block size for repeating the data.
      */
     void sendDataRepeated(uint16_t data, uint32_t len, uint32_t blockSize = 64) const;
+
+    [[nodiscard]] uint16_t getWidth() const;
+
+    [[nodiscard]] uint16_t getHeight() const;
 };
 
 #endif //LCDLIBRARY_LCDCONTROLLER_H

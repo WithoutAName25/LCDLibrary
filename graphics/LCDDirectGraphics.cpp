@@ -1,57 +1,41 @@
 #include "LCDDirectGraphics.h"
 
 void LCDDirectGraphics::clear(color background) {
-    setWindows(0, 0, getWidth(), getHeight());
+    setWindows(0, 0, getWidth() - 1, getHeight() - 1);
     sendDataRepeated(background, getWidth() * getHeight());
 }
 
 void LCDDirectGraphics::draw(uint8_t x, uint8_t y, bitmap image) {
-    uint8_t x0 = x;
-    uint8_t y0 = y;
-    uint8_t x1 = x + image.width - 1;
-    uint8_t y1 = y + image.height - 1;
-    setRectWindow(x0, y0, x1, y1);
-
-    applyTransformation(x0, y0);
-    applyTransformation(x1, y1);
-
-    uint8_t minX = x0 < x1 ? x0 : x1;
-    uint8_t minY = y0 < y1 ? y0 : y1;
+    setWindows(x, y, x + image.width - 1, y + image.height - 1);
 
     spi->beginTransmission();
     spi->enableData();
-    for (int dY = 0; dY < getRotation() % 180 == 0 ? image.height : image.width; ++dY) {
-        for (int dX = 0; dX < getRotation() % 180 == 0 ? image.width : image.height; ++dX) {
-            uint8_t pixelX = minX + dX;
-            uint8_t pixelY = minY + dY;
-            reverseTransformation(pixelX, pixelY);
-            color pixel = image.data[pixelY * image.width + pixelX];
-            spi->write(pixel >> 8);
-            spi->write(pixel);
-        }
+    for (int i = 0; i < image.width * image.height; ++i) {
+        color pixel = image.data[i];
+        spi->write(pixel >> 8);
+        spi->write(pixel);
     }
     spi->endTransmission();
 }
 
 void LCDDirectGraphics::drawPixel(uint8_t x, uint8_t y, color color) {
-    applyTransformation(x, y);
-    setWindows(x, y, x + 1, y + 1);
+    setWindows(x, y, x, y);
     sendDataWord(color);
 }
 
-void LCDDirectGraphics::fillRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, color color) {
-    setRectWindow(x0, y0, x1, y1);
+void LCDDirectGraphics::fillRect(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY, color color) {
+    setWindows(firstX, firstY, lastX, lastY);
 
-    sendDataRepeated(color, (x1 + 1 - x0) * (y1 + 1 - y0));
+    sendDataRepeated(color, (lastX + 1 - firstX) * (lastY + 1 - firstY));
 }
 
 void
-LCDDirectGraphics::fillBorderedRect(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t borderWidth, color inner,
-                                    color border) {
-    setRectWindow(x0, y0, x1, y1);
+LCDDirectGraphics::fillBorderedRect(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY,
+                                    uint8_t borderWidth, color inner, color border) {
+    setWindows(firstX, firstY, lastX, lastY);
 
-    uint8_t width = getRotation() % 180 == 0 ? (x1 + 1 - x0) : (y1 + 1 - y0);
-    uint8_t height = getRotation() % 180 == 0 ? (y1 + 1 - y0) : (x1 + 1 - x0);
+    uint16_t width = lastX + 1 - firstX;
+    uint16_t height = lastY + 1 - firstY;
 
     sendDataRepeated(border, width * borderWidth + borderWidth);
     for (int i = 0; i < height - 2 * borderWidth; ++i) {

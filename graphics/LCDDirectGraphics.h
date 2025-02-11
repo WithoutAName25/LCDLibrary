@@ -3,24 +3,24 @@
 
 #include "LCDGraphics.h"
 
-class LCDDirectGraphics : public LCDGraphics {
+class LCDDirectGraphics final : public LCDGraphics {
 public:
-    LCDDirectGraphics(SPIInterface *spi,
-                      uint resetPin,
-                      uint backlightPin,
-                      uint8_t hwXOffset,
-                      uint8_t hwYOffset,
-                      uint8_t hwWidth,
-                      uint8_t hwHeight,
-                      Rotation rotation)
-            : LCDGraphics(spi,
-                          resetPin,
-                          backlightPin,
-                          hwXOffset,
-                          hwYOffset,
-                          hwWidth,
-                          hwHeight,
-                          rotation) {}
+    LCDDirectGraphics(SPIInterface* spi,
+                      const uint resetPin,
+                      const uint backlightPin,
+                      const uint8_t hwXOffset,
+                      const uint8_t hwYOffset,
+                      const uint8_t hwWidth,
+                      const uint8_t hwHeight,
+                      const Rotation rotation)
+        : LCDGraphics(spi,
+                      resetPin,
+                      backlightPin,
+                      hwXOffset,
+                      hwYOffset,
+                      hwWidth,
+                      hwHeight,
+                      rotation) {}
 
     void clear(color background) override;
 

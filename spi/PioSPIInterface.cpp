@@ -1,12 +1,12 @@
 #include "PioSPIInterface.h"
 #include "spi.pio.h"
 
-PIOSPIInterface::PIOSPIInterface(PIO pio,
-                                 uint8_t dataPin,
-                                 uint8_t clockPin,
-                                 uint chipSelectPin1,
-                                 uint dataCommandPin1)
-        : SPIInterface(chipSelectPin1, dataCommandPin1),
+PIOSPIInterface::PIOSPIInterface(const PIO pio,
+                                 const uint8_t dataPin,
+                                 const uint8_t clockPin,
+                                 const uint chipSelectPin,
+                                 const uint dataCommandPin)
+        : SPIInterface(chipSelectPin, dataCommandPin),
           pio(pio),
           dataPin(dataPin),
           clockPin(clockPin) {
@@ -14,21 +14,21 @@ PIOSPIInterface::PIOSPIInterface(PIO pio,
 }
 
 void PIOSPIInterface::waitIdle() const {
-    uint32_t sm_stall_mask = 1u << (sm + PIO_FDEBUG_TXSTALL_LSB);
+    const uint32_t sm_stall_mask = 1u << (sm + PIO_FDEBUG_TXSTALL_LSB);
     pio->fdebug = sm_stall_mask;
     while (!(pio->fdebug & sm_stall_mask));
 }
 
-void PIOSPIInterface::putData(uint8_t data) const {
+void PIOSPIInterface::putData(const uint8_t data) const {
     while (pio_sm_is_tx_fifo_full(pio, sm))
         ;
-    *(volatile uint8_t*)&pio->txf[sm] = data;
+    *reinterpret_cast<volatile uint8_t*>(&pio->txf[sm]) = data;
 }
 
 void PIOSPIInterface::init() const {
     SPIInterface::init();
 
-    uint offset = pio_add_program(pio, &pio_spi_program);
+    const uint offset = pio_add_program(pio, &pio_spi_program);
 
     pio_gpio_init(pio, dataPin);
     pio_gpio_init(pio, clockPin);
@@ -44,7 +44,7 @@ void PIOSPIInterface::init() const {
     pio_sm_set_enabled(pio, sm, true);
 }
 
-void PIOSPIInterface::write(uint8_t *bytes, uint32_t len) const {
+void PIOSPIInterface::write(uint8_t *bytes, const uint32_t len) const {
     for (int i = 0; i < len; ++i) {
         putData(bytes[i]);
     }

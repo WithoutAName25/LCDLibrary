@@ -26,7 +26,7 @@ add_library(LCDLibrary STATIC
 pico_generate_pio_header(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/spi/spi.pio)
 
 target_include_directories(LCDLibrary PUBLIC
-    include
+        include
 )
 
 target_link_libraries(LCDLibrary pico_stdlib hardware_spi hardware_pio hardware_pwm)

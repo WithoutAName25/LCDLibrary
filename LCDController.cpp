@@ -1,8 +1,11 @@
 #include "LCDController.h"
 
-LCDController::LCDController(SPIInterface *spi, uint8_t resetPin, uint8_t backlightPin, uint16_t hwXOffset,
-                             uint16_t hwYOffset, uint16_t hwWidth, uint16_t hwHeight, Rotation rotation)
-        : spi(spi), resetPin(resetPin), backlightPin(backlightPin), hwXOffset(hwXOffset),
+#include "hardware/pwm.h"
+#include "pico/stdlib.h"
+
+LCDController::LCDController(SPIInterface *spi, const uint8_t resetPin, const uint8_t backlightPin, const uint16_t hwXOffset,
+                             const uint16_t hwYOffset, const uint16_t hwWidth, const uint16_t hwHeight, const Rotation rotation)
+        : resetPin(resetPin), backlightPin(backlightPin), spi(spi), hwXOffset(hwXOffset),
           hwYOffset(hwYOffset), hwWidth(hwWidth), hwHeight(hwHeight), rotation(rotation) {
     backlightPWMSlice = pwm_gpio_to_slice_num(backlightPin);
     backlightPWMChannel = pwm_gpio_to_channel(backlightPin);
@@ -95,17 +98,18 @@ void LCDController::setBrightness(uint8_t value) {
     pwm_set_chan_level(backlightPWMSlice, backlightPWMChannel, brightness);
 }
 
-void LCDController::setRotation(Rotation newRotation) {
+void LCDController::setRotation(const Rotation newRotation) {
     rotation = newRotation;
     updateMemoryDataAccessControl();
 }
 
-void LCDController::setWindows(uint16_t firstX, uint16_t firstY, uint16_t lastX, uint16_t lastY) const {
+void LCDController::setWindows(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX, const uint16_t lastY) const {
     uint16_t x0;
     uint16_t x1;
     uint16_t y0;
     uint16_t y1;
     switch (rotation) {
+        default:
         case Degree_0:
             x0 = hwXOffset + firstX;
             x1 = hwXOffset + lastX;
@@ -154,21 +158,21 @@ void LCDController::setWindows(uint16_t firstX, uint16_t firstY, uint16_t lastX,
     spi->endTransmission();
 }
 
-void LCDController::sendCommand(uint8_t command) const {
+void LCDController::sendCommand(const uint8_t command) const {
     spi->beginTransmission();
     spi->enableCommand();
     spi->write(command);
     spi->endTransmission();
 }
 
-void LCDController::sendDataByte(uint8_t data) const {
+void LCDController::sendDataByte(const uint8_t data) const {
     spi->beginTransmission();
     spi->enableData();
     spi->write(data);
     spi->endTransmission();
 }
 
-void LCDController::sendDataWord(uint16_t data) const {
+void LCDController::sendDataWord(const uint16_t data) const {
     spi->beginTransmission();
     spi->enableData();
     spi->write(data >> 8);
@@ -176,7 +180,7 @@ void LCDController::sendDataWord(uint16_t data) const {
     spi->endTransmission();
 }
 
-void LCDController::sendDataBytes(uint8_t *data, uint32_t len) const {
+void LCDController::sendDataBytes(uint8_t *data, const uint32_t len) const {
     spi->beginTransmission();
     spi->enableData();
 
@@ -185,7 +189,7 @@ void LCDController::sendDataBytes(uint8_t *data, uint32_t len) const {
     spi->endTransmission();
 }
 
-void LCDController::sendDataRepeated(uint16_t data, uint32_t len, uint32_t blockSize) const {
+void LCDController::sendDataRepeated(const uint16_t data, const uint32_t len, const uint32_t blockSize) const {
     spi->beginTransmission();
     spi->enableData();
 
@@ -195,7 +199,7 @@ void LCDController::sendDataRepeated(uint16_t data, uint32_t len, uint32_t block
         dataArray[2 * i + 1] = data;
     }
 
-    uint32_t numBlocks = len / blockSize;
+    const uint32_t numBlocks = len / blockSize;
     for (uint32_t i = 0; i < numBlocks; ++i) {
         spi->write(dataArray, blockSize * 2);
     }

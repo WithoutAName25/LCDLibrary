@@ -3,8 +3,7 @@
 
 #include "SPIInterface.h"
 
-class PIOSPIInterface : public SPIInterface {
-private:
+class PIOSPIInterface final : public SPIInterface {
     PIO pio;
     uint sm;
     uint8_t dataPin;

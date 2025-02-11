@@ -1,11 +1,10 @@
 #ifndef LCDLIBRARY_HARDWARESPIINTERFACE_H
 #define LCDLIBRARY_HARDWARESPIINTERFACE_H
 
-
+#include <hardware/spi.h>
 #include "SPIInterface.h"
 
-class HardwareSPIInterface : public SPIInterface {
-private:
+class HardwareSPIInterface final : public SPIInterface {
     spi_inst *spiInst;
     uint8_t dataPin;
     uint8_t clockPin;

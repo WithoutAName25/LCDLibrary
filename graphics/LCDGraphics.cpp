@@ -1,13 +1,13 @@
 #include "LCDGraphics.h"
 
 LCDGraphics::LCDGraphics(SPIInterface *spi,
-                         uint resetPin,
-                         uint backlightPin,
-                         uint16_t hwXOffset,
-                         uint16_t hwYOffset,
-                         uint16_t hwWidth,
-                         uint16_t hwHeight,
-                         Rotation rotation)
+                         const uint resetPin,
+                         const uint backlightPin,
+                         const uint16_t hwXOffset,
+                         const uint16_t hwYOffset,
+                         const uint16_t hwWidth,
+                         const uint16_t hwHeight,
+                         const Rotation rotation)
         : LCDController(spi,
                         resetPin,
                         backlightPin,

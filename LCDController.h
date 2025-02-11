@@ -1,9 +1,6 @@
 #ifndef LCDLIBRARY_LCDCONTROLLER_H
 #define LCDLIBRARY_LCDCONTROLLER_H
 
-#include "pico/stdlib.h"
-#include "hardware/spi.h"
-#include "hardware/pwm.h"
 #include "spi/SPIInterface.h"
 
 enum Rotation {
@@ -24,7 +21,6 @@ enum Rotation {
  * It does not provide Methods for painting.
  */
 class LCDController {
-private:
     uint8_t resetPin;
     uint8_t backlightPin;
     uint8_t brightness = 100;

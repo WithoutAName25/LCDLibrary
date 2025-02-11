@@ -1,7 +1,6 @@
 #ifndef LCDLIBRARY_UTILS_H
 #define LCDLIBRARY_UTILS_H
 
-#include "pico/stdlib.h"
 #include "memory"
 
 typedef uint16_t color;

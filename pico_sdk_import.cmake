@@ -54,7 +54,7 @@ if (NOT PICO_SDK_PATH)
     else ()
         message(FATAL_ERROR
                 "SDK location was not specified. Please set PICO_SDK_PATH or set PICO_SDK_FETCH_FROM_GIT to on to fetch from git."
-                )
+        )
     endif ()
 endif ()
 

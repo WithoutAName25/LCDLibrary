@@ -1,28 +1,23 @@
 #include "PioSPIInterface.h"
 #include "spi.pio.h"
 
-PIOSPIInterface::PIOSPIInterface(const PIO pio,
-                                 const uint8_t dataPin,
-                                 const uint8_t clockPin,
-                                 const uint chipSelectPin,
+PIOSPIInterface::PIOSPIInterface(const PIO pio, const uint8_t dataPin, const uint8_t clockPin, const uint chipSelectPin,
                                  const uint dataCommandPin)
-        : SPIInterface(chipSelectPin, dataCommandPin),
-          pio(pio),
-          dataPin(dataPin),
-          clockPin(clockPin) {
+    : SPIInterface(chipSelectPin, dataCommandPin), pio(pio), dataPin(dataPin), clockPin(clockPin) {
     sm = pio_claim_unused_sm(pio, true);
 }
 
 void PIOSPIInterface::waitIdle() const {
     const uint32_t sm_stall_mask = 1u << (sm + PIO_FDEBUG_TXSTALL_LSB);
     pio->fdebug = sm_stall_mask;
-    while (!(pio->fdebug & sm_stall_mask));
+    while (!(pio->fdebug & sm_stall_mask))
+        ;
 }
 
 void PIOSPIInterface::putData(const uint8_t data) const {
     while (pio_sm_is_tx_fifo_full(pio, sm))
         ;
-    *reinterpret_cast<volatile uint8_t*>(&pio->txf[sm]) = data;
+    *reinterpret_cast<volatile uint8_t *>(&pio->txf[sm]) = data;
 }
 
 void PIOSPIInterface::init() const {

@@ -10,5 +10,3 @@ void SPIInterface::init() const {
     gpio_put(chipSelectPin, true);
     gpio_put(dataCommandPin, false);
 }
-
-

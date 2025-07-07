@@ -27,4 +27,4 @@ struct bitmap {
  */
 color getRGBColor(uint8_t r, uint8_t g, uint8_t b);
 
-#endif //LCDLIBRARY_UTILS_H
+#endif // LCDLIBRARY_UTILS_H

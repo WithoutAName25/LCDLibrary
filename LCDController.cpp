@@ -3,10 +3,11 @@
 #include "hardware/pwm.h"
 #include "pico/stdlib.h"
 
-LCDController::LCDController(SPIInterface *spi, const uint8_t resetPin, const uint8_t backlightPin, const uint16_t hwXOffset,
-                             const uint16_t hwYOffset, const uint16_t hwWidth, const uint16_t hwHeight, const Rotation rotation)
-        : resetPin(resetPin), backlightPin(backlightPin), spi(spi), hwXOffset(hwXOffset),
-          hwYOffset(hwYOffset), hwWidth(hwWidth), hwHeight(hwHeight), rotation(rotation) {
+LCDController::LCDController(SPIInterface *spi, const uint8_t resetPin, const uint8_t backlightPin,
+                             const uint16_t hwXOffset, const uint16_t hwYOffset, const uint16_t hwWidth,
+                             const uint16_t hwHeight, const Rotation rotation)
+    : resetPin(resetPin), backlightPin(backlightPin), spi(spi), hwXOffset(hwXOffset), hwYOffset(hwYOffset),
+      hwWidth(hwWidth), hwHeight(hwHeight), rotation(rotation) {
     backlightPWMSlice = pwm_gpio_to_slice_num(backlightPin);
     backlightPWMChannel = pwm_gpio_to_channel(backlightPin);
 }
@@ -68,18 +69,18 @@ void LCDController::updateMemoryDataAccessControl() const {
     spi->enableData();
     uint8_t madctl = 0;
     switch (rotation) {
-        case Degree_0:
-            madctl = 0b00000000; // Normal mode
-            break;
-        case Degree_90:
-            madctl = 0b10100000; // Y-Mirror, X-Y-Exchange
-            break;
-        case Degree_180:
-            madctl = 0b11000000; // Y-Mirror, X-Mirror
-            break;
-        case Degree_270:
-            madctl = 0b01100000; // X-Mirror, X-Y-Exchange
-            break;
+    case Degree_0:
+        madctl = 0b00000000; // Normal mode
+        break;
+    case Degree_90:
+        madctl = 0b10100000; // Y-Mirror, X-Y-Exchange
+        break;
+    case Degree_180:
+        madctl = 0b11000000; // Y-Mirror, X-Mirror
+        break;
+    case Degree_270:
+        madctl = 0b01100000; // X-Mirror, X-Y-Exchange
+        break;
     }
     spi->write(madctl);
     spi->endTransmission();
@@ -93,7 +94,8 @@ void LCDController::reset() const {
 }
 
 void LCDController::setBrightness(uint8_t value) {
-    if (value > 100) value = 100;
+    if (value > 100)
+        value = 100;
     brightness = value;
     pwm_set_chan_level(backlightPWMSlice, backlightPWMChannel, brightness);
 }
@@ -103,37 +105,38 @@ void LCDController::setRotation(const Rotation newRotation) {
     updateMemoryDataAccessControl();
 }
 
-void LCDController::setWindows(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX, const uint16_t lastY) const {
+void LCDController::setWindows(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX,
+                               const uint16_t lastY) const {
     uint16_t x0;
     uint16_t x1;
     uint16_t y0;
     uint16_t y1;
     switch (rotation) {
-        default:
-        case Degree_0:
-            x0 = hwXOffset + firstX;
-            x1 = hwXOffset + lastX;
-            y0 = hwYOffset + firstY;
-            y1 = hwYOffset + lastY;
-            break;
-        case Degree_90:
-            x0 = 320 - hwYOffset - hwHeight + firstX;
-            x1 = 320 - hwYOffset - hwHeight + lastX;
-            y0 = hwXOffset + firstY;
-            y1 = hwXOffset + lastY;
-            break;
-        case Degree_180:
-            x0 = 240 - hwXOffset - hwWidth + firstX;
-            x1 = 240 - hwXOffset - hwWidth + lastX;
-            y0 = 320 - hwYOffset - hwHeight + firstY;
-            y1 = 320 - hwYOffset - hwHeight + lastY;
-            break;
-        case Degree_270:
-            x0 = hwYOffset + firstX;
-            x1 = hwYOffset + lastX;
-            y0 = 240 - hwXOffset - hwWidth + firstY;
-            y1 = 240 - hwXOffset - hwWidth + lastY;
-            break;
+    default:
+    case Degree_0:
+        x0 = hwXOffset + firstX;
+        x1 = hwXOffset + lastX;
+        y0 = hwYOffset + firstY;
+        y1 = hwYOffset + lastY;
+        break;
+    case Degree_90:
+        x0 = 320 - hwYOffset - hwHeight + firstX;
+        x1 = 320 - hwYOffset - hwHeight + lastX;
+        y0 = hwXOffset + firstY;
+        y1 = hwXOffset + lastY;
+        break;
+    case Degree_180:
+        x0 = 240 - hwXOffset - hwWidth + firstX;
+        x1 = 240 - hwXOffset - hwWidth + lastX;
+        y0 = 320 - hwYOffset - hwHeight + firstY;
+        y1 = 320 - hwYOffset - hwHeight + lastY;
+        break;
+    case Degree_270:
+        x0 = hwYOffset + firstX;
+        x1 = hwYOffset + lastX;
+        y0 = 240 - hwXOffset - hwWidth + firstY;
+        y1 = 240 - hwXOffset - hwWidth + lastY;
+        break;
     }
 
     spi->beginTransmission();
@@ -208,10 +211,6 @@ void LCDController::sendDataRepeated(const uint16_t data, const uint32_t len, co
     spi->endTransmission();
 }
 
-uint16_t LCDController::getWidth() const {
-    return rotation % 180 == 0 ? hwWidth : hwHeight;
-}
+uint16_t LCDController::getWidth() const { return rotation % 180 == 0 ? hwWidth : hwHeight; }
 
-uint16_t LCDController::getHeight() const {
-    return rotation % 180 == 0 ? hwHeight : hwWidth;
-}
+uint16_t LCDController::getHeight() const { return rotation % 180 == 0 ? hwHeight : hwWidth; }

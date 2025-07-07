@@ -1,8 +1,8 @@
 #ifndef LCDLIBRARY_HARDWARESPIINTERFACE_H
 #define LCDLIBRARY_HARDWARESPIINTERFACE_H
 
-#include <hardware/spi.h>
 #include "SPIInterface.h"
+#include <hardware/spi.h>
 
 class HardwareSPIInterface final : public SPIInterface {
     spi_inst *spiInst;
@@ -17,5 +17,4 @@ public:
     void write(uint8_t *bytes, uint32_t len) const override;
 };
 
-
-#endif //LCDLIBRARY_HARDWARESPIINTERFACE_H
+#endif // LCDLIBRARY_HARDWARESPIINTERFACE_H

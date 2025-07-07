@@ -3,12 +3,7 @@
 
 #include "spi/SPIInterface.h"
 
-enum Rotation {
-    Degree_0 = 0,
-    Degree_90 = 90,
-    Degree_180 = 180,
-    Degree_270 = 270
-};
+enum Rotation { Degree_0 = 0, Degree_90 = 90, Degree_180 = 180, Degree_270 = 270 };
 
 /**
  * \class LCDController
@@ -70,8 +65,8 @@ public:
      *
      * \brief Sets the brightness of the LCD backlight.
      *
-     * This function sets the brightness of the LCD backlight to the specified value. The value must be between 0 and 100.
-     * If the specified value is greater than 100, it will be clamped to 100.
+     * This function sets the brightness of the LCD backlight to the specified value. The value must be between 0 and
+     * 100. If the specified value is greater than 100, it will be clamped to 100.
      *
      * \param value The brightness value to set (between 0 and 100).
      */
@@ -109,8 +104,8 @@ public:
      *
      * \brief Sends a 16-bit data word to the LCD display.
      *
-     * This function sends a 16-bit data word to the LCD display using SPI communication. The data is split into two 8-bit bytes
-     * and sent sequentially.
+     * This function sends a 16-bit data word to the LCD display using SPI communication. The data is split into two
+     * 8-bit bytes and sent sequentially.
      *
      * \param data The 16-bit data word to be sent.
      */
@@ -145,4 +140,4 @@ public:
     [[nodiscard]] uint16_t getHeight() const;
 };
 
-#endif //LCDLIBRARY_LCDCONTROLLER_H
+#endif // LCDLIBRARY_LCDCONTROLLER_H

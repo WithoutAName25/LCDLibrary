@@ -23,15 +23,16 @@ void LCDDirectGraphics::drawPixel(const uint8_t x, const uint8_t y, const color 
     sendDataWord(color);
 }
 
-void LCDDirectGraphics::fillRect(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX, const uint16_t lastY, const color color) {
+void LCDDirectGraphics::fillRect(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX,
+                                 const uint16_t lastY, const color color) {
     setWindows(firstX, firstY, lastX, lastY);
 
     sendDataRepeated(color, (lastX + 1 - firstX) * (lastY + 1 - firstY));
 }
 
-void
-LCDDirectGraphics::fillBorderedRect(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX, const uint16_t lastY,
-                                    const uint8_t borderWidth, const color inner, const color border) {
+void LCDDirectGraphics::fillBorderedRect(const uint16_t firstX, const uint16_t firstY, const uint16_t lastX,
+                                         const uint16_t lastY, const uint8_t borderWidth, const color inner,
+                                         const color border) {
     setWindows(firstX, firstY, lastX, lastY);
 
     const uint16_t width = lastX + 1 - firstX;

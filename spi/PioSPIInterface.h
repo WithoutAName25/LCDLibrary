@@ -20,8 +20,6 @@ public:
     void init() const override;
 
     void write(uint8_t *bytes, uint32_t len) const override;
-
-
 };
 
-#endif //LCDLIBRARY_PIOSPIINTERFACE_H
+#endif // LCDLIBRARY_PIOSPIINTERFACE_H

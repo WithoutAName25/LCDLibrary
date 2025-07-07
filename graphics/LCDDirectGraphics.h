@@ -5,22 +5,9 @@
 
 class LCDDirectGraphics final : public LCDGraphics {
 public:
-    LCDDirectGraphics(SPIInterface* spi,
-                      const uint resetPin,
-                      const uint backlightPin,
-                      const uint8_t hwXOffset,
-                      const uint8_t hwYOffset,
-                      const uint8_t hwWidth,
-                      const uint8_t hwHeight,
-                      const Rotation rotation)
-        : LCDGraphics(spi,
-                      resetPin,
-                      backlightPin,
-                      hwXOffset,
-                      hwYOffset,
-                      hwWidth,
-                      hwHeight,
-                      rotation) {}
+    LCDDirectGraphics(SPIInterface *spi, const uint resetPin, const uint backlightPin, const uint8_t hwXOffset,
+                      const uint8_t hwYOffset, const uint8_t hwWidth, const uint8_t hwHeight, const Rotation rotation)
+        : LCDGraphics(spi, resetPin, backlightPin, hwXOffset, hwYOffset, hwWidth, hwHeight, rotation) {}
 
     void clear(color background) override;
 
@@ -34,5 +21,4 @@ public:
                           color inner, color border) override;
 };
 
-
-#endif //LCDLIBRARY_LCDDIRECTGRAPHICS_H
+#endif // LCDLIBRARY_LCDDIRECTGRAPHICS_H

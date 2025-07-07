@@ -11,8 +11,8 @@ protected:
     virtual void waitIdle() const {}
 
 public:
-    SPIInterface(const uint chipSelectPin, const uint dataCommandPin) : chipSelectPin(chipSelectPin),
-                                                                        dataCommandPin(dataCommandPin) {}
+    SPIInterface(const uint chipSelectPin, const uint dataCommandPin)
+        : chipSelectPin(chipSelectPin), dataCommandPin(dataCommandPin) {}
 
     virtual ~SPIInterface() = default;
 
@@ -38,12 +38,9 @@ public:
         gpio_put(chipSelectPin, true);
     }
 
-    void write(uint8_t byte) const {
-        write(&byte, 1);
-    }
+    void write(uint8_t byte) const { write(&byte, 1); }
 
-    virtual void write(uint8_t* bytes, uint32_t len) const = 0;
+    virtual void write(uint8_t *bytes, uint32_t len) const = 0;
 };
 
-
-#endif //PICOKEYBOARD_SPIINTERFACE_H
+#endif // PICOKEYBOARD_SPIINTERFACE_H
